@@ -2,6 +2,10 @@ const userModel = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const transporter = require("../config/nodemailer");
+const {
+  EMAIL_VERIFY_TEMPLATE,
+  PASSWORD_RESET_TEMPLATE,
+} = require("../config/emailTempletes");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -144,7 +148,11 @@ const sendVerifyOtp = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: user.email,
       subject: "Account Verification OTP",
-      text: `Your verification OTP is ${otp}. Please enter this OTP to verify your account.`,
+      // text: `Your verification OTP is ${otp}. Please enter this OTP to verify your account.`,
+      html: EMAIL_VERIFY_TEMPLATE.replace("{{otp}}", otp).replace(
+        "{{email}}",
+        user.email
+      ),
     };
     // await transporter.sendMail(mailOptions);
     try {
@@ -249,7 +257,11 @@ const sendResetOtp = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: user.email,
       subject: "Password reset OTP",
-      text: `Your OTP is ${otp} `,
+      // text: `Your OTP is ${otp} `,
+      html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace(
+        "{{email}}",
+        user.email
+      ),
     };
     try {
       await transporter.sendMail(mailOptions);
